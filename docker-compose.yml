@@ -1,0 +1,71 @@
+version: '3'
+services:
+  pub-1:
+    image: golang
+    restart: unless-stopped
+    depends_on:
+      - nats-streaming
+    volumes:
+      - ./pub/:/app
+      - $GOPATH/pkg/mod:/go/pkg/mod
+    working_dir: /app
+    command: go run main.go -id pub001
+
+  pub-2:
+    image: golang
+    restart: unless-stopped
+    depends_on:
+      - nats-streaming
+    volumes:
+      - ./pub/:/app
+      - $GOPATH/pkg/mod:/go/pkg/mod
+    working_dir: /app
+    command: go run main.go -id pub002
+
+  sub-1:
+    image: golang
+    restart: unless-stopped
+    depends_on:
+      - nats-streaming
+    volumes:
+      - ./sub/:/app
+      - $GOPATH/pkg/mod:/go/pkg/mod
+    working_dir: /app
+    command: go run main.go -id sub001
+
+  sub-2:
+    image: golang
+    restart: unless-stopped
+    depends_on:
+      - nats-streaming
+    volumes:
+      - ./sub/:/app
+      - $GOPATH/pkg/mod:/go/pkg/mod
+    working_dir: /app
+    command: go run main.go -id sub002
+
+
+
+  nats-streaming:
+    image: nats-streaming
+    command:
+      - "--cluster_id"
+      - nats-streaming
+      - "--dir"
+      - /data/msg
+      - "--port"
+      - "4222"
+      - "--store"
+      - file
+      - "--stan_debug"
+      - "--hb_interval"
+      - 2s
+      - "--hb_fail_count"
+      - "1"
+      - "--hb_timeout"
+      - 5s
+
+    volumes:
+      - "./nats-streaming:/data"
+
+    restart: unless-stopped
